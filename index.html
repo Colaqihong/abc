@@ -36,8 +36,8 @@
     </div>
 
     <div class="controls">
-        <button class="check-btn" onclick="checkWriting()">✔ Semak / Check</button>
-        <button class="clear-btn" onclick="clearCanvas()">✖ Kosongkan / Clear</button>
+        <button class="check-btn" onclick="checkWriting()">✔ Check</button>
+        <button class="clear-btn" onclick="clearCanvas()">✖ Clear</button>
     </div>
 
     <div id="result" class="result"></div>
@@ -45,8 +45,8 @@
     <hr style="border:0; border-top:1px solid #ddd; margin:20px 0;">
 
     <div class="navigation">
-        <button class="nav-btn" id="prevBtn" onclick="prevLetter()">⬅️ Sebelumnya</button>
-        <button class="nav-btn" id="nextBtn" onclick="nextLetter()">Seterusnya ➡️</button>
+        <button class="nav-btn" id="prevBtn" onclick="prevLetter()">⬅️ Previous</button>
+        <button class="nav-btn" id="nextBtn" onclick="nextLetter()">Next ➡️</button>
     </div>
 </div>
 
@@ -76,7 +76,7 @@ function loadCurrentLetter() {
     const currentLetter = alphabetData[currentIndex];
     
     // 更新标题和背景字
-    document.getElementById("title").innerHTML = `Latihan Menulis '${currentLetter}'`;
+    document.getElementById("title").innerHTML = `Writing Practice '${currentLetter}'`;
     document.getElementById("traceGuide").innerText = currentLetter;
     
     // 控制上一页/下一页按钮的开关
@@ -153,13 +153,12 @@ function clearCanvas(){
 function checkWriting(){
     const result = document.getElementById("result");
     
-    // 因为只有一个字母，书写长度的门槛可以降低。150 大概是随便画两笔的长度
     if(totalLength > 150){
-        result.innerHTML = "Bagus! 🎉";
+        result.innerHTML = "Well done! 🎉";
         result.style.color = "green";
         playSuccessSound();
     } else {
-        result.innerHTML = "Cuba lagi 😢";
+        result.innerHTML = "Try again 😢";
         result.style.color = "red";
         playFailSound();
     }
