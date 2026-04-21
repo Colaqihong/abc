@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Writing Practice - A to Z</title>
+<style>
+    body { font-family: Arial; background: linear-gradient(to bottom, #a8e6cf, #dcedc1); text-align:center; padding:30px; }
+    .container { max-width:700px; margin:auto; background:#ffffffee; padding:25px; border-radius:15px; }
+    .word { font-size:50px; font-weight:bold; text-transform: uppercase; }
+    .trace-area { position:relative; width:420px; height:100px; margin:30px auto; }
+    .trace-guide { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:56px; font-weight:bold; letter-spacing:6px; color:transparent; -webkit-text-stroke:2px #999; text-transform: uppercase; }
+    #traceCanvas { position:absolute; top:0; left:0; width:420px; height:100px; z-index:2; border:1px dashed #ccc; }
+    .image-box img { width:200px; height:200px; object-fit:cover; border-radius:12px; margin-top:10px;}
+    button { padding:12px 20px; margin:5px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; }
+    .check-btn { background:#4CAF50;color:white; }
+    .clear-btn { background:#E74C3C;color:white; }
+    .nav-btn { background:#3498DB;color:white; }
+    .nav-btn:disabled { background:#95a5a6; cursor:not-allowed; }
+    .result { font-size:28px; margin-top:15px; height: 35px; }
+    .controls { margin-top: 15px; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1 id="title">Writing Practice 🅰️</h1>
+    
+    <div class="word" id="wordDisplay">APPLE</div>
+    
+    <div class="image-box">
+        <img id="imageDisplay" src="https://placehold.co/200x200/FFB6C1/FFF?text=Apple" alt="Word Image">
+    </div>
+
+    <div class="trace-area">
+        <div class="trace-guide" id="traceGuide">APPLE</div>
+        <canvas id="traceCanvas" width="420" height="100"></canvas>
+    </div>
+
+    <div class="controls">
+        <button class="check-btn" onclick="checkWriting()">✔ Semak / Check</button>
+        <button class="clear-btn" onclick="clearCanvas()">✖ Kosongkan / Clear</button>
+    </div>
+
+    <div id="result" class="result"></div>
+
+    <hr style="border:0; border-top:1px solid #ddd; margin:20px 0;">
+
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="prevLetter()">⬅️ Sebelumnya</button>
+        <button class="nav-btn" id="nextBtn" onclick="nextLetter()">Seterusnya ➡️</button>
+    </div>
+</div>
+
+<script>
+// A 到 Z 的数据列表 (你可以随时在这里修改单词和更换你想要的图片链接)
+const alphabetData = [
+    { letter: "A", word: "APPLE", img: "https://placehold.co/200x200/FF9999/FFF?text=Apple" },
+    { letter: "B", word: "BEAR", img: "https://placehold.co/200x200/99CCFF/FFF?text=Bear" },
+    { letter: "C", word: "CAT", img: "https://placehold.co/200x200/FFCC99/FFF?text=Cat" },
+    { letter: "D", word: "DOG", img: "https://placehold.co/200x200/99FF99/FFF?text=Dog" },
+    { letter: "E", word: "ELEPHANT", img: "https://placehold.co/200x200/CCCCFF/FFF?text=Elephant" },
+    { letter: "F", word: "FROG", img: "https://placehold.co/200x200/99CC99/FFF?text=Frog" },
+    { letter: "G", word: "GOAT", img: "https://upload.wikimedia.org/wikipedia/commons/b/b2/Hausziege_04.jpg" },
+    { letter: "H", word: "HORSE", img: "https://placehold.co/200x200/CC9966/FFF?text=Horse" },
+    { letter: "I", word: "IGUANA", img: "https://placehold.co/200x200/99FFCC/FFF?text=Iguana" },
+    { letter: "J", word: "JUICE", img: "https://placehold.co/200x200/FF99CC/FFF?text=Juice" },
+    { letter: "K", word: "KITE", img: "https://placehold.co/200x200/FFCCFF/FFF?text=Kite" },
+    { letter: "L", word: "LION", img: "https://placehold.co/200x200/FFCC66/FFF?text=Lion" },
+    { letter: "M", word: "MONKEY", img: "https://placehold.co/200x200/999966/FFF?text=Monkey" },
+    { letter: "N", word: "NEST", img: "https://placehold.co/200x200/CCCCCC/FFF?text=Nest" },
+    { letter: "O", word: "OWL", img: "https://placehold.co/200x200/666699/FFF?text=Owl" },
+    { letter: "P", word: "PENGUIN", img: "https://placehold.co/200x200/333333/FFF?text=Penguin" },
+    { letter: "Q", word: "QUEEN", img: "https://placehold.co/200x200/FF6699/FFF?text=Queen" },
+    { letter: "R", word: "RABBIT", img: "https://placehold.co/200x200/FFB6C1/FFF?text=Rabbit" },
+    { letter: "S", word: "SNAKE", img: "https://placehold.co/200x200/66CC66/FFF?text=Snake" },
+    { letter: "T", word: "TIGER", img: "https://upload.wikimedia.org/wikipedia/commons/5/56/Tiger.50.jpg" },
+    { letter: "U", word: "UMBRELLA", img: "https://placehold.co/200x200/6699FF/FFF?text=Umbrella" },
+    { letter: "V", word: "VAN", img: "https://placehold.co/200x200/999999/FFF?text=Van" },
+    { letter: "W", word: "WHALE", img: "https://placehold.co/200x200/0066CC/FFF?text=Whale" },
+    { letter: "X", word: "XYLOPHONE", img: "https://placehold.co/200x200/FF9933/FFF?text=Xylophone" },
+    { letter: "Y", word: "YOYO", img: "https://placehold.co/200x200/FF3333/FFF?text=Yoyo" },
+    { letter: "Z", word: "ZEBRA", img: "https://placehold.co/200x200/000000/FFF?text=Zebra" }
+];
+
+let currentIndex = 0;
+
+// 画布设置
+const canvas = document.getElementById("traceCanvas");
+const ctx = canvas.getContext("2d");
+let drawing=false, totalLength=0, lastX=0, lastY=0;
+ctx.lineWidth=4; ctx.lineCap="round";
+
+// 音频设置
+const successAudio = new Audio('button-37a.mp3');
+const failAudio = new Audio('beep-03.mp3');
+
+function playSuccessSound(){ successAudio.currentTime=0; successAudio.play().catch(e=>console.log("Playback failed:", e)); }
+function playFailSound(){ failAudio.currentTime=0; failAudio.play().catch(e=>console.log("Playback failed:", e)); }
+
+// 初始化并加载当前的字母数据
+function loadCurrentLetter() {
+    const data = alphabetData[currentIndex];
+    
+    // 更新文字和图片
+    document.getElementById("title").innerHTML = `Writing Practice ${data.letter} ✨`;
+    document.getElementById("wordDisplay").innerText = data.word;
+    document.getElementById("traceGuide").innerText = data.word;
+    document.getElementById("imageDisplay").src = data.img;
+    
+    // 禁用/启用按钮
+    document.getElementById("prevBtn").disabled = (currentIndex === 0);
+    document.getElementById("nextBtn").disabled = (currentIndex === alphabetData.length - 1);
+    
+    // 切换题目时清空画板
+    clearCanvas();
+}
+
+// 上一个/下一个功能
+function prevLetter() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        loadCurrentLetter();
+    }
+}
+
+function nextLetter() {
+    if (currentIndex < alphabetData.length - 1) {
+        currentIndex++;
+        loadCurrentLetter();
+    }
+}
+
+// 画画逻辑
+function drawLine(x,y){ 
+    let dx=x-lastX, dy=y-lastY; 
+    totalLength += Math.sqrt(dx*dx+dy*dy); 
+    ctx.lineTo(x,y); 
+    ctx.stroke(); 
+    lastX=x; lastY=y; 
+}
+
+canvas.addEventListener("mousedown", e=>{drawing=true; lastX=e.offsetX; lastY=e.offsetY; ctx.beginPath(); ctx.moveTo(lastX,lastY);});
+canvas.addEventListener("mousemove", e=>{if(drawing) drawLine(e.offsetX,e.offsetY);});
+canvas.addEventListener("mouseup", ()=>drawing=false);
+canvas.addEventListener("mouseleave", ()=>drawing=false);
+
+canvas.addEventListener("touchstart", e=>{const touch=e.touches[0]; const rect=canvas.getBoundingClientRect(); drawing=true; lastX=touch.clientX-rect.left; lastY=touch.clientY-rect.top; ctx.beginPath(); ctx.moveTo(lastX,lastY);});
+canvas.addEventListener("touchmove", e=>{if(!drawing) return; e.preventDefault(); const touch=e.touches[0]; const rect=canvas.getBoundingClientRect(); drawLine(touch.clientX-rect.left,touch.clientY-rect.top);},{passive:false});
+canvas.addEventListener("touchend", ()=>drawing=false);
+canvas.addEventListener("touchcancel", ()=>drawing=false);
+
+function clearCanvas(){ 
+    ctx.clearRect(0,0,canvas.width,canvas.height); 
+    totalLength=0; 
+    document.getElementById("result").innerText=""; 
+}
+
+function checkWriting(){
+    const result = document.getElementById("result");
+    const currentWordLength = alphabetData[currentIndex].word.length;
+    // 动态判定门槛：每个字母大概需要 150 的长度，如果写的是 APPLE (5个字母)，就是 5 * 150 = 750
+    const requiredLength = currentWordLength * 150; 
+
+    if(totalLength > requiredLength){
+        result.innerHTML = "Bagus! 🎉";
+        result.style.color = "green";
+        playSuccessSound();
+    } else {
+        result.innerHTML = "Cuba lagi 😢";
+        result.style.color = "red";
+        playFailSound();
+    }
+}
+
+// 网页加载完成后，初始化第一个字母 (A)
+window.onload = loadCurrentLetter;
+
+</script>
+</body>
+</html>
